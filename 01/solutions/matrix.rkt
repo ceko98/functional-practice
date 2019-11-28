@@ -13,7 +13,9 @@
          map-matrix
          filter-matrix
          zip-with
-         zip-matrix)
+         zip-matrix
+         foldl
+         foldr)
 ; the provide "exports" these functions
 
 (define (foldr f nv xs)
@@ -49,14 +51,7 @@
 
 ; 05.
 (define (matrix-ref xss i j)
- (define (elem-in-row xs j)
-  (if (= 0 j)
-    (car xs)
-    (elem-in-row (cdr xs) (- j 1))))
- 
- (if (= i 0)
-  (elem-in-row (car xss) j)
-  (matrix-ref (cdr xss) (- i 1) j)))
+  (list-ref (list-ref xss i) j))
 
 ; 06.
 (define (set xs i x)
