@@ -38,7 +38,7 @@
 
 ; 02.
 (define (concat xss)
-  (foldl append '() xss))
+  (foldr append '() xss))
 
 ; 03.
 (define (rows xss) xss)
@@ -61,10 +61,7 @@
 
 ; 07.
 (define (place xss i j x)
-  (if (= i 0)
-    (cons (set (car xss) j x) (cdr xss))
-    (cons (car xss) (place (cdr xss) (- i 1) j x)) ))
-
+  (set xss i (set (list-ref xss i) j x)))
 ; 08.
 (define (diag xss)
   (if (null? xss)
@@ -84,11 +81,9 @@
 
 ; 12.
 (define (zip-with f xs ys)
-  (if (null? xs)
-    '()
-    (if (null? ys)
+  (if (or (null? xs) (null? ys))
       '()
-      (cons (f (car xs) (car ys)) (zip-with f (cdr xs) (cdr ys))))))
+      (cons (f (car xs) (car ys)) (zip-with f (cdr xs) (cdr ys)))))
 
 ; 13.
 (define (zip-matrix xss yss)
