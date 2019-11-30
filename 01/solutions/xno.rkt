@@ -33,12 +33,11 @@
 
 (define (next-sign p) (if (equal? p "X") "O" "X"))
 
-(define (eval-board win curr-sign)
+(define (eval-board win me)
   (cond
-    ((equal? win curr-sign) 1)
-    ((equal? win (next-sign curr-sign)) -1)
     ((equal? win "D") 0)
-    (else #f)))
+    (me 1)
+    ((not me) -1)))
 
 (define (get-empty b)
   (define (helper i j)
@@ -48,21 +47,21 @@
           (else (helper i (+ j 1)))))
   (helper 0 0))
 
-(define (helper-max b p)
-  (define (map-help b p)
-    (lambda (pr) (helper-min (place b (car pr) (cdr pr) p) (next-sign p))))
+(define (helper-max b p me?)
+  (define (map-help)
+    (lambda (pr) (helper-min (place b (car pr) (cdr pr) p) (next-sign p) (not me?))))
 
   (if (winner b)
-    (eval-board (winner b) p)
-    (foldr max -2 (map (map-help b p) (get-empty b)))))
+    (eval-board (winner b) me?)
+    (foldr max -2 (map (map-help) (get-empty b)))))
 
-(define (helper-min b p)
-  (define (map-help b p)
-    (lambda (pr) (helper-max (place b (car pr) (cdr pr) p) (next-sign p))))
+(define (helper-min b p me?)
+  (define (map-help)
+    (lambda (pr) (helper-max (place b (car pr) (cdr pr) p) (next-sign p) (not me?))))
 
   (if (winner b)
-    (eval-board (winner b) p)
-    (foldr min 2 (map (map-help b p) (get-empty b)))))
+    (eval-board (winner b) me?)
+    (foldr min 2 (map (map-help) (get-empty b)))))
 
 (define (play b p)
   (define (foldr-help)
@@ -70,11 +69,12 @@
       (if (> (car pr) (car curr))
         pr
         curr)))
+
   (cdr (foldr (foldr-help) (cons -2 (cons 0 0))
     (zip-with
       cons
-      (map 
+      (map
         (lambda (pr)
-          (helper-max b p))
+          (helper-max b p #t))
         (get-empty b))
       (get-empty b)))))
