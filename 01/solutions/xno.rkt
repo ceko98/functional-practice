@@ -1,5 +1,4 @@
 #lang racket
- (require racket/trace)
 
 (provide winner
          play)
@@ -66,7 +65,7 @@
     (foldr min 2 (map helper (get-empty b)))))
 
 (define (play b p)
-  (define (helper acc val)
+  (define (maximum-on acc val)
       (if (> (cdr val) (cdr acc))
         val
         acc))
@@ -76,4 +75,4 @@
       xs
       (map (lambda (pair) (minimise (place b (car pair) (cdr pair) p) p #t)) xs)))
       
-  (car (foldr helper '((0 . 0) . -2) (map-move-to-value (get-empty b)))))
+  (car (foldr maximum-on '((0 . 0) . -2) (map-move-to-value (get-empty b)))))
