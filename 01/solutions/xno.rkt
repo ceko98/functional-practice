@@ -49,34 +49,35 @@
     (me -1)
     (else 1)))
 
-(define (helper-max b curr-p me)
-  (define (help)
-    (lambda (pr) (helper-min (place b (car pr) (cdr pr) curr-p) (next-p curr-p) (not me))))
+(define (maximise b curr-p me)
+  (define (helper pair)
+    (minimise (place b (car pair) (cdr pair) curr-p) (next-p curr-p) (not me)))
 
   (if (winner b)
     (eval-board b me)
-    (foldr max -2 (map (help) (get-empty b)))))
+    (foldr max -2 (map helper (get-empty b)))))
 
-(define (helper-min b curr-p me)
-  (define (help)
-    (lambda (pr) (helper-max (place b (car pr) (cdr pr) curr-p) (next-p curr-p) (not me))))
+(define (minimise b curr-p me)
+  (define (helper pair)
+    (maximise (place b (car pair) (cdr pair) curr-p) (next-p curr-p) (not me)))
 
   (if (winner b)
     (eval-board b me)
-    (foldr min 2 (map (help) (get-empty b)))))
+    (foldr min 2 (map helper (get-empty b)))))
 
 (define (play b p)
-  (define (help-lambda)
-    (lambda (acc val)
+  (define (helper acc val)
       (if (> (cdr val) (cdr acc))
         val
-        acc)))
-  (define (mapped-values)
-    (map 
-      (lambda (pr) (cons pr (helper-min (place b (car pr) (cdr pr) p) p #t)))
-      (get-empty b)))
-  (mapped-values))
-  ;(car (foldr (help-lambda) '((0 . 0) . -2) (mapped-values))))
-(play '(( #f #f)
-        (#f #f #f)
-        ("O" "X" "X")) "X")
+        acc))
+  (define (map-move-to-value xs)
+    (zip-with
+      cons
+      xs
+      (map (lambda (pair) (minimise (place b (car pair) (cdr pair) p) p #t)) xs)))
+  (car (foldr helper '((0 . 0) . -2) (map-move-to-value (get-empty b)))))
+
+
+(play '((#f #f #f)
+          (#f #f #f)
+          (#f #f #f)) "X")
