@@ -75,9 +75,5 @@
       cons
       xs
       (map (lambda (pair) (minimise (place b (car pair) (cdr pair) p) p #t)) xs)))
+      
   (car (foldr helper '((0 . 0) . -2) (map-move-to-value (get-empty b)))))
-
-
-(play '((#f #f #f)
-          (#f #f #f)
-          (#f #f #f)) "X")
