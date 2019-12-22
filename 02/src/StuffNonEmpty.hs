@@ -21,8 +21,8 @@ mapNonEmpty f (x :| xs) = f x :| map f xs
 
 groupByNonEmpty :: (a -> a -> Bool) -> [a] -> [NonEmpty a]
 groupByNonEmpty _ [] = []
-groupByNonEmpty f (x:xs) = (x :| fst grouped) : groupByNonEmpty f (snd grouped)
-  where grouped = span (f x) xs
+groupByNonEmpty f (x:xs) = (x :| h) : groupByNonEmpty f t
+  where (h, t) = span (f x) xs
 
 groupOnNonEmpty :: Eq b => (a -> b) -> [a] -> [NonEmpty a]
 groupOnNonEmpty f =
@@ -31,4 +31,8 @@ groupOnNonEmpty f =
   . map (f &&& id)
 
 classifyOnNonEmpty :: Ord b => (a -> b) -> [a] -> [NonEmpty a]
-classifyOnNonEmpty f = groupOnNonEmpty f . sortOn f
+classifyOnNonEmpty f =
+  map (mapNonEmpty snd)
+  . groupByNonEmpty ((==) `on` fst)
+  . sortBy (compare `on` fst)
+  . map (f &&& id)

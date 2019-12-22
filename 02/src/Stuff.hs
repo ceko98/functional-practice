@@ -18,8 +18,7 @@ insertBy _ a [] = [a]
 insertBy f a (x:xs) = if f a x == GT then x : insertBy f a xs else a:x:xs
 
 sortBy :: (a -> a -> Ordering) -> [a] -> [a]
-sortBy _ [] = []
-sortBy f (x:xs) = insertBy f x (sortBy f xs)
+sortBy f = foldr (insertBy f) []
 
 groupBy :: (a -> a -> Bool) -> [a] -> [[a]]
 groupBy _ [] = []
@@ -29,6 +28,10 @@ groupBy f (x:y:xs) =
       h = head res
       t = tail res
   in if x `f` y then (x : h) : t else [x] : h : t
+-- groupBy f xs = case xs
+--   of [] -> []
+--   of [x] -> [[x]]
+--   of (x:y:_) ->
 
 on :: (b -> b -> c) -> (a -> b) -> a -> a -> c
 on f g x y = f (g x) (g y)
@@ -43,10 +46,14 @@ sortOn f
   . map (f &&& id)
 
 groupOn :: Eq b => (a -> b) -> [a] -> [[a]]
-groupOn f
-  = map (map snd)
+groupOn f =
+    map (map snd)
     . groupBy ((==) `on` fst) 
     . map (f &&& id)
 
 classifyOn :: Ord b => (a -> b) -> [a] -> [[a]]
-classifyOn f = groupOn f . sortOn f
+classifyOn f =
+  map (map snd)
+  . groupBy ((==) `on` fst)
+  . sortBy (compare `on` fst)
+  . map (f &&& id)
