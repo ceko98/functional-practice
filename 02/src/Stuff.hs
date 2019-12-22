@@ -10,7 +10,7 @@ module Stuff
   ) where
 
 group :: Eq a => [a] -> [[a]]
-group xs = groupBy (==) xs
+group = groupBy (==)
 
 -- Not mandatory, delete if you don't want this.
 insertBy :: (a -> a -> Ordering) -> a -> [a] -> [a]
