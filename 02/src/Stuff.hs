@@ -24,14 +24,9 @@ groupBy :: (a -> a -> Bool) -> [a] -> [[a]]
 groupBy _ [] = []
 groupBy _ [x] = [[x]]
 groupBy f (x:y:xs) =
-  let res = groupBy f (y:xs)
-      h = head res
-      t = tail res
-  in if x `f` y then (x : h) : t else [x] : h : t
--- groupBy f xs = case xs
---   of [] -> []
---   of [x] -> [[x]]
---   of (x:y:_) ->
+  case groupBy f (y:xs) of
+      [] -> []
+      (h:t) -> if x `f` y then (x : h) : t else [x] : h : t
 
 on :: (b -> b -> c) -> (a -> b) -> a -> a -> c
 on f g x y = f (g x) (g y)
