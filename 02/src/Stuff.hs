@@ -10,11 +10,7 @@ module Stuff
   ) where
 
 group :: Eq a => [a] -> [[a]]
-group [] = []
-group [x] = [[x]]
-group (x:y:xs) =
-  let (a : res) = group (y:xs)
-  in if x == y then (x : a) : res else [x] : a : res
+group xs = groupBy (==) xs
 
 -- Not mandatory, delete if you don't want this.
 insertBy :: (a -> a -> Ordering) -> a -> [a] -> [a]
@@ -29,8 +25,10 @@ groupBy :: (a -> a -> Bool) -> [a] -> [[a]]
 groupBy _ [] = []
 groupBy _ [x] = [[x]]
 groupBy f (x:y:xs) =
-  let (a : res) = groupBy f (y:xs)
-  in if x `f` y then (x : a) : res else [x] : a : res
+  let res = groupBy f (y:xs)
+      h = head res
+      t = tail res
+  in if x `f` y then (x : h) : t else [x] : h : t
 
 on :: (b -> b -> c) -> (a -> b) -> a -> a -> c
 on f g x y = f (g x) (g y)
