@@ -27,7 +27,10 @@ sortBy f (x:xs) = insertBy f x (sortBy f xs)
 
 groupBy :: (a -> a -> Bool) -> [a] -> [[a]]
 groupBy _ [] = []
-groupBy f xs = takeBy f xs : groupBy f (dropBy f xs)
+groupBy _ [x] = [[x]]
+groupBy f (x:y:xs) =
+  let (a : res) = groupBy f (y:xs)
+  in if x `f` y then (x : a) : res else [x] : a : res
 
 on :: (b -> b -> c) -> (a -> b) -> a -> a -> c
 on f g x y = f (g x) (g y)
