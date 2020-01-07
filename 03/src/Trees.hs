@@ -32,18 +32,23 @@ listToBST = go Empty
     go tr (x:xs) = go (insertOrdered x tr) xs
 
 isBST :: Ord a => Tree a -> Bool
-isBST = undefined
--- isBST Empty = True
--- isBST (Node a ltr Empty) = treeVal ltr < a && isBST ltr
--- isBST (Node a Empty rtr) = a < treeVal rtr && isBST rtr
--- isBST (Node a ltr rtr) = treeVal ltr < a && a < treeVal rtr && isBST ltr && isBST rtr
+isBST = between Bot Top
 
 -- idea for implementing isBST - delete if you don't want it
 data BotTop a = Bot | Val a | Top
   deriving (Show, Eq, Ord)
 
+-- instance Ord a => Ord (BotTop a) where
+--   (<=) :: BotTop a -> BotTop a -> Bool
+--   (<=) Bot _ = True
+--   (<=) _ Top = True
+--   (<=) (Val x) (Val y) = x <= y
+--   (<=) _ _ = False
+
 between :: Ord a => BotTop a -> BotTop a -> Tree a -> Bool
-between = undefined
+between _ _ Empty = True
+between a b (Node x ltr rtr) = a <= v && v <= b && between a v ltr && between v b rtr
+  where v = (Val x)
 
 findBST :: Ord a => a -> Tree a -> Bool
 findBST _ Empty = False
