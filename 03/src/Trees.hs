@@ -14,10 +14,10 @@ data Tree a
 
 instance Eq a => Eq (Tree a) where
   (==) :: Tree a -> Tree a -> Bool
-  (==) Empty Empty = True
-  (==) Empty _ = False
-  (==) _ Empty = False
-  (==) (Node x ltr1 rtr1) (Node y ltr2 rtr2) = x == y && ltr1 == ltr2 && rtr1 == rtr2
+  Empty == Empty = True
+  Node x ltr1 rtr1 == Node y ltr2 rtr2 = x == y && ltr1 == ltr2 && rtr1 == rtr2
+  _ == _ = False
+
 
 insertOrdered :: Ord a => a -> Tree a -> Tree a
 insertOrdered x Empty = Node x Empty Empty
@@ -26,10 +26,7 @@ insertOrdered x (Node a ltr rtr) = if x <= a
   else Node a ltr (insertOrdered x rtr)
 
 listToBST :: Ord a => [a] -> Tree a
-listToBST = go Empty
-  where
-    go tr [] = tr
-    go tr (x:xs) = go (insertOrdered x tr) xs
+listToBST = foldr insertOrdered Empty
 
 isBST :: Ord a => Tree a -> Bool
 isBST = between Bot Top
@@ -38,17 +35,10 @@ isBST = between Bot Top
 data BotTop a = Bot | Val a | Top
   deriving (Show, Eq, Ord)
 
--- instance Ord a => Ord (BotTop a) where
---   (<=) :: BotTop a -> BotTop a -> Bool
---   (<=) Bot _ = True
---   (<=) _ Top = True
---   (<=) (Val x) (Val y) = x <= y
---   (<=) _ _ = False
-
 between :: Ord a => BotTop a -> BotTop a -> Tree a -> Bool
-between _ _ Empty = True
 between a b (Node x ltr rtr) = a <= v && v <= b && between a v ltr && between v b rtr
-  where v = (Val x)
+  where v = Val x
+between _ _ Empty = True
 
 findBST :: Ord a => a -> Tree a -> Bool
 findBST _ Empty = False
@@ -84,10 +74,7 @@ findPred :: (a -> Bool) -> Tree a -> Maybe a
 findPred f = getFirst . foldMapTree (First . onMaybe f)
 
 findAll :: (a -> Bool) -> Tree a -> [a]
-findAll f = foldMapTree (help . onMaybe f)
-  where
-    help Nothing = []
-    help (Just a) = [a]
+findAll f = foldMapTree (\x -> [x | f x])
 
 ifJust :: Maybe a -> (a -> Maybe b) -> Maybe b
 ifJust Nothing _ = Nothing

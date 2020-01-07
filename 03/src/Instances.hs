@@ -13,7 +13,7 @@ newtype Pointwise a b = Pointwise {getPointwise :: (a, b)}
 
 instance (Ord a, Ord b) => Ord (Pointwise a b) where
   (<=) :: Pointwise a b -> Pointwise a b -> Bool
-  (<=) (Pointwise (a, b)) (Pointwise (c, d)) = a <= c && b <= d
+  Pointwise (a, b) <= Pointwise (c, d) = a <= c && b <= d
 
 newtype Lexicographic a b = Lexicographic {getLexicographic :: (a, b)}
   deriving (Show, Eq)
@@ -21,13 +21,13 @@ newtype Lexicographic a b = Lexicographic {getLexicographic :: (a, b)}
 -- The default instance for tuples and lists
 instance (Ord a, Ord b) => Ord (Lexicographic a b) where
   (<=) :: Lexicographic a b -> Lexicographic a b -> Bool
-  (<=) (Lexicographic (a, b)) (Lexicographic (c ,d)) = a < c || a == c && b <= d
+  Lexicographic (a, b) <= Lexicographic (c ,d) = a < c || a == c && b <= d
 
 newtype Fun a b = Fun {getFun :: a -> b}
 
 instance (Semigroup b) => Semigroup (Fun a b) where
   (<>) :: Fun a b -> Fun a b -> Fun a b
-  (<>) f g = Fun (\x -> getFun f x <> getFun g x)
+  Fun f <> Fun g = Fun (\x -> f x <> g x)
 
 instance (Monoid b) => Monoid (Fun a b) where
   mempty :: Fun a b
@@ -38,8 +38,8 @@ newtype First a = First {getFirst :: Maybe a}
 
 instance Semigroup (First a) where
   (<>) :: First a -> First a -> First a
-  (<>) (First (Just x)) _ = First $ Just x
-  (<>) (First Nothing) x = x
+  First (Just x) <> _ = First $ Just x
+  First Nothing <> x = x
 
 instance Monoid (First a) where
   mempty :: First a
@@ -50,8 +50,8 @@ newtype Last a = Last {getLast :: Maybe a}
 
 instance Semigroup (Last a) where
   (<>) :: Last a -> Last a -> Last a
-  (<>) (Last _) (Last (Just x)) = Last $ Just x
-  (<>) x _ = x 
+  Last _ <> Last (Just x) = Last $ Just x
+  x <> _ = x 
 
 instance Monoid (Last a) where
   mempty :: Last a
@@ -63,7 +63,7 @@ newtype Pair a b = Pair {getPair :: (a, b)}
 -- The default instance for tuples
 instance (Semigroup a, Semigroup b) => Semigroup (Pair a b) where
   (<>) :: Pair a b -> Pair a b -> Pair a b
-  (<>) (Pair (a, b)) (Pair (c, d)) = Pair (a <> c, b <> d)
+  Pair (a, b) <> Pair (c, d) = Pair (a <> c, b <> d)
 
 instance (Monoid a, Monoid b) => Monoid (Pair a b) where
   mempty :: Pair a b
@@ -74,7 +74,7 @@ newtype Dual a = Dual {getDual :: a}
 
 instance Semigroup a => Semigroup (Dual a) where
   (<>) :: Dual a -> Dual a -> Dual a
-  (<>) (Dual f) (Dual g) = Dual $ g <> f
+  Dual f <> Dual g = Dual $ g <> f
 
 instance Monoid a => Monoid (Dual a) where
   mempty :: Dual a
@@ -94,11 +94,11 @@ flux x = Flux (Just (x, x)) 0
 
 instance (Eq a) => Semigroup (Flux a) where
   (<>) :: Flux a -> Flux a -> Flux a
-  (<>) (Flux Nothing _) (Flux Nothing _) = (Flux Nothing 0)
-  (<>) (Flux Nothing _) f = f
-  (<>) f (Flux Nothing _) = f
-  (<>) (Flux (Just (a, b)) n) (Flux (Just (c, d)) m) =
-    if b == c then Flux (Just (a, d)) (m + n) else Flux (Just (a, d)) (m + n + 1)
+  Flux Nothing _ <> Flux Nothing _ = Flux Nothing 0
+  Flux Nothing _ <> f = f
+  f <> Flux Nothing _ = f
+  Flux (Just (a, b)) n <> Flux (Just (c, d)) m = Flux (Just (a, d)) (m + n + inc)
+    where inc = if b == c then 0 else 1
 
 instance (Eq a) => Monoid (Flux a) where
   mempty :: Flux a
