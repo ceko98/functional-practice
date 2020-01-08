@@ -10,29 +10,45 @@ module Stuff
   ) where
 
 group :: Eq a => [a] -> [[a]]
-group = undefined
+group = groupBy (==)
 
 -- Not mandatory, delete if you don't want this.
 insertBy :: (a -> a -> Ordering) -> a -> [a] -> [a]
-insertBy = undefined
+insertBy _ a [] = [a]
+insertBy f a (x:xs) = if f a x == GT then x : insertBy f a xs else a:x:xs
 
 sortBy :: (a -> a -> Ordering) -> [a] -> [a]
-sortBy = undefined
+sortBy f = foldr (insertBy f) []
 
 groupBy :: (a -> a -> Bool) -> [a] -> [[a]]
-groupBy = undefined
+groupBy _ [] = []
+groupBy _ [x] = [[x]]
+groupBy f (x:y:xs) =
+  case groupBy f (y:xs) of
+      [] -> []
+      (h:t) -> if x `f` y then (x : h) : t else [x] : h : t
 
 on :: (b -> b -> c) -> (a -> b) -> a -> a -> c
-on = undefined
+on f g x y = f (g x) (g y)
 
 (&&&) :: (a -> b) -> (a -> c) -> a -> (b, c)
-(&&&) = undefined
+(&&&) f g x = (f x, g x)
 
 sortOn :: Ord b => (a -> b) -> [a] -> [a]
-sortOn = undefined
+sortOn f 
+  = map snd
+  . sortBy (compare `on` fst) 
+  . map (f &&& id)
 
 groupOn :: Eq b => (a -> b) -> [a] -> [[a]]
-groupOn = undefined
+groupOn f =
+    map (map snd)
+    . groupBy ((==) `on` fst) 
+    . map (f &&& id)
 
 classifyOn :: Ord b => (a -> b) -> [a] -> [[a]]
-classifyOn = undefined
+classifyOn f =
+  map (map snd)
+  . groupBy ((==) `on` fst)
+  . sortBy (compare `on` fst)
+  . map (f &&& id)
