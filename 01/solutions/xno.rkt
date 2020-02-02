@@ -35,7 +35,7 @@
 
 (define (get-empty b)
   (define (helper i j)
-    (cond 
+    (cond
       ((> i 2) '())
       ((> j 2) (helper (+ i 1) 0))
       ((not (matrix-ref b i j)) (cons (cons i j) (helper i (+ j 1))))
@@ -45,12 +45,15 @@
 (define (eval-board b me)
   (cond
     ((equal? (winner b) "D") 0)
-    (me -1)
-    (else 1)))
+    ((equal? (symbol me) (winner b)) 1)
+    (else -1)))
+
+(define (symbol x)
+  (if x "X" "O"))
 
 (define (maximise b curr-p me)
   (define (helper pair)
-    (minimise (place b (car pair) (cdr pair) curr-p) (next-p curr-p) (not me)))
+    (minimise (place b (car pair) (cdr pair) curr-p) (next-p curr-p) me))
 
   (if (winner b)
     (eval-board b me)
@@ -58,7 +61,7 @@
 
 (define (minimise b curr-p me)
   (define (helper pair)
-    (maximise (place b (car pair) (cdr pair) curr-p) (next-p curr-p) (not me)))
+    (maximise (place b (car pair) (cdr pair) curr-p) (next-p curr-p) me))
 
   (if (winner b)
     (eval-board b me)
@@ -73,6 +76,6 @@
     (zip-with
       cons
       xs
-      (map (lambda (pair) (minimise (place b (car pair) (cdr pair) p) p #t)) xs)))
-      
+      (map (lambda (pair) (minimise (place b (car pair) (cdr pair) (symbol p)) (symbol (not p)) p)) xs)))
+
   (car (foldr maximum-on '((0 . 0) . -2) (map-move-to-value (get-empty b)))))
